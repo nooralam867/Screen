@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Full Screen Screenshot</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+      background-color: #f4f4f9;
+    }
+    video {
+      margin-top: 20px;
+      width: 80%;
+      border: 2px solid #007bff;
+      border-radius: 8px;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Capture Full Screen Screenshot</h1>
+  <button id="start-btn">Start Screen Capture</button>
+  <button id="capture-btn" style="display:none;">Take Screenshot</button>
+  <video id="screen-video" autoplay muted style="display:none;"></video>
+
+  <script>
+    const startButton = document.getElementById("start-btn");
+    const captureButton = document.getElementById("capture-btn");
+    const videoElement = document.getElementById("screen-video");
+
+    let mediaStream;
+
+    // Start screen capture
+    startButton.addEventListener("click", async () => {
+      try {
+        // Request screen capture
+        mediaStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+        videoElement.srcObject = mediaStream;
+        videoElement.style.display = "block";
+        startButton.style.display = "none";
+        captureButton.style.display = "inline-block";
+      } catch (error) {
+        console.error("Error starting screen capture:", error);
+        alert("Failed to start screen capture. Make sure you grant permissions.");
+      }
+    });
+
+    // Capture screenshot
+    captureButton.addEventListener("click", () => {
+      try {
+        const track = mediaStream.getVideoTracks()[0];
+        const imageCapture = new ImageCapture(track);
+
+        imageCapture.takePhoto().then(blob => {
+          const imgURL = URL.createObjectURL(blob);
+
+          // Create a link to download the screenshot
+          const link = document.createElement("a");
+          link.href = imgURL;
+          link.download = "screenshot.png";
+          link.click();
+        }).catch(error => {
+          console.error("Error taking screenshot:", error);
+          alert("Failed to capture screenshot.");
+        });
+      } catch (error) {
+        console.error("Error capturing screenshot:", error);
+      }
+    });
+  </script>
+</body>
+</html>
